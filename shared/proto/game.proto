@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package game;
+
+service GameService {
+  rpc StartGame(StartGameRequest) returns (StartGameResponse);
+  rpc CreateBot(CreateBotRequest) returns (CreateBotResponse);
+  rpc PlayCard(PlayCardRequest) returns (PlayCardResponse);
+  rpc GetBotDecision(GetBotDecisionRequest) returns (GetBotDecisionResponse);
+  rpc ResetBot(ResetBotRequest) returns (ResetBotResponse);
+  rpc GetBotHand(GetBotHandRequest) returns (GetBotHandResponse);
+}
+
+message Card {
+  string rank = 1;
+  string suit = 2;
+}
+
+message CreateBotRequest {
+  string name = 1;
+  float aggression = 2;
+}
+
+message CreateBotResponse {
+  string bot_id = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message PlayCardRequest {
+  string bot_id = 1;
+  repeated Card current_trick = 2;
+  repeated Card hand = 3;
+}
+
+message PlayCardResponse {
+  Card played_card = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message StartGameRequest {
+  string bot_id = 1;
+  repeated Card hand = 2;
+}
+
+message StartGameResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetBotDecisionRequest {
+  string bot_id = 1;
+  repeated Card current_trick = 2;
+}
+
+message GetBotDecisionResponse {
+  Card suggested_card = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message ResetBotRequest {
+  string bot_id = 1;
+}
+
+message ResetBotResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetBotHandRequest {
+  string bot_id = 1;
+}
+
+message GetBotHandResponse {
+  repeated Card hand = 1;
+  bool success = 2;
+  string error = 3;
+}

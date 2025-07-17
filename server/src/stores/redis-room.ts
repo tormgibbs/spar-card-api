@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import type { Room, Player } from "@/types";
+import type { Player, Room } from "@/types";
 import type { RoomStore } from "@/types/room-store";
 import { pub, redis } from "@/utils/redis";
 

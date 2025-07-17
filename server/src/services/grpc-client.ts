@@ -1,6 +1,7 @@
 import path from "node:path";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
+import type { GameServiceConstructor } from "@/types/game";
 
 const PROTO_PATH = path.join(
   import.meta.dirname,
@@ -17,14 +18,16 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 
 interface GameProtoPackage {
   game: {
-    GameService: grpc.ServiceClientConstructor;
+    GameService: GameServiceConstructor;
   };
 }
 
-const gameProto = grpc.loadPackageDefinition(packageDefinition).game as unknown as GameProtoPackage;
+const gameProto = grpc.loadPackageDefinition(packageDefinition) as unknown as GameProtoPackage;
+
+const GRPC_HOST = process.env.GRPC_HOST || "localhost:50051"
 
 const botClient = new gameProto.game.GameService(
-  "bot-server:50051",
+  GRPC_HOST,
   grpc.credentials.createInsecure(),
 );
 

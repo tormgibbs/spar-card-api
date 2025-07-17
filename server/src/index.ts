@@ -1,6 +1,5 @@
 import http from "node:http";
 import express from "express";
-import botRoutes from "./routes/bot";
 import roomRoutes from "./routes/room";
 import { errorHandler, notFound } from "./utils/middlewares";
 import { initSocket } from "./utils/socket";
@@ -16,7 +15,6 @@ app.use((request, _response, next) => {
 });
 
 app.use(express.json());
-app.use("/bot", botRoutes);
 app.use("/rooms", roomRoutes);
 
 app.use(notFound);

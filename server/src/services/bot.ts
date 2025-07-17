@@ -6,7 +6,7 @@ export const createBot = (
   aggression: number,
 ): Promise<{ success: boolean; bot_id?: string; error?: string }> => {
   return new Promise((resolve) => {
-    botClient.CreateBot({ name, aggression }, (err: any, res: any) => {
+    botClient.createBot({ name, aggression }, (err, res) => {
       if (err || !res.success)
         resolve({ success: false, error: err?.message || res?.error });
       else resolve({ success: true, bot_id: res.bot_id });
@@ -16,7 +16,7 @@ export const createBot = (
 
 export const startGameOnBot = (botId: string, hand: Card[]): Promise<void> => {
   return new Promise((resolve, reject) => {
-    botClient.StartGame({ bot_id: botId, hand }, (err: any, res: any) => {
+    botClient.startGame({ bot_id: botId, hand }, (err, res) => {
       if (err || !res.success) return reject(err || res.error);
       resolve();
     });
@@ -29,10 +29,13 @@ export const playCardOnBot = (
   hand: Card[],
 ): Promise<Card> => {
   return new Promise((resolve, reject) => {
-    botClient.PlayCard(
+    botClient.playCard(
       { bot_id: botId, current_trick: currentTrick, hand },
-      (err: any, res: any) => {
+      (err, res) => {
         if (err || !res.success) return reject(err || res.error);
+        if (!res.played_card) {
+          return reject(new Error("No card was played"));
+        }
         resolve(res.played_card);
       },
     );

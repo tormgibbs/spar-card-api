@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   bot-server:
     build: ./bot
@@ -10,10 +8,24 @@ services:
 
   node-client:
     build: ./server
+    ports:
+      - "3000:3000"
     depends_on:
       - bot-server
     networks:
       - grpc-net
+    volumes:
+      - ./shared:/shared
+    environment:
+      - GRPC_HOST=bot-server:50051
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+
+  redis:
+      image: redis:8.0-alpine
+      networks:
+        - grpc-net
 
 networks:
   grpc-net:

@@ -1,10 +1,17 @@
-FROM node:20-alpine
+FROM node:22-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY tsconfig.json ./
+
 RUN npm install
 
 COPY . .
 
-CMD ["node", "index.js"]
+RUN pnpm build
+
+CMD ["node", "dist/index.js"]

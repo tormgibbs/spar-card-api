@@ -2,21 +2,30 @@ import path from "node:path";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 
-const PROTO_PATH = path.join(__dirname, "../../../shared/proto/game.proto");
+const PROTO_PATH = path.join(
+  import.meta.dirname,
+  "../../../shared/proto/game.proto",
+);
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-	keepCase: true,
-	longs: String,
-	enums: String,
-	defaults: true,
-	oneofs: true,
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
 });
 
-const gameProto = grpc.loadPackageDefinition(packageDefinition).game as any;
+interface GameProtoPackage {
+  game: {
+    GameService: grpc.ServiceClientConstructor;
+  };
+}
 
-const botClient = new gameProto.GameService(
-	"bot-server:50051",
-	grpc.credentials.createInsecure(),
+const gameProto = grpc.loadPackageDefinition(packageDefinition).game as unknown as GameProtoPackage;
+
+const botClient = new gameProto.game.GameService(
+  "bot-server:50051",
+  grpc.credentials.createInsecure(),
 );
 
 export default botClient;

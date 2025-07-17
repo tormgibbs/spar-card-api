@@ -12,12 +12,14 @@ type JoinPayload = {
 	aggression?: number;
 };
 
-export const createRoom = async () => {
-	return await store.createRoom();
+export const createRoom = async (player: Player) => {  
+	return await store.createRoom(player);
 };
 
 export const getRoom = async (roomId: string) => {
-	return await store.getRoom(roomId);
+	const room = await store.getRoom(roomId)
+	if (!room) throw new HttpError(httpStatus.NotFound, "room not found")
+	return room
 };
 
 export const joinRoom = async (

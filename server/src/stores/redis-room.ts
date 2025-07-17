@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
-import type { Room } from "@/types";
+import type { Room, Player } from "@/types";
 import type { RoomStore } from "@/types/room-store";
 import { pub, redis } from "@/utils/redis";
 
 const ROOM_PREFIX = "room:";
 
 export const redisRoomStore: RoomStore = {
-	async createRoom() {
+	async createRoom(creator: Player) {
 		const room: Room = {
 			id: uuidv4(),
 			players: [],
@@ -14,6 +14,7 @@ export const redisRoomStore: RoomStore = {
 			trickNumber: 0,
 			turnIndex: 0,
 			status: "waiting",
+			creatorId: creator.id,
 		};
 		await redis.set(
 			`${ROOM_PREFIX}${room.id}`,

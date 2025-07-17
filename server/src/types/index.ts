@@ -17,4 +17,5 @@ export type Room = {
   trickNumber: number;
   turnIndex: number;
   status: "waiting" | "playing" | "finished";
+  creatorId: string;
 };

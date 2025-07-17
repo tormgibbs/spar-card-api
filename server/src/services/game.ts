@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { roomStore as store } from "@/stores/room";
 import type { Card } from "@/types";
 import { shuffleDeck } from "@/utils/deck";
+import { HttpError } from "@/utils/errors";
+import httpStatus from "@/utils/http-status";
 import { getIO } from "@/utils/socket";
 import {
 	emitCardPlayed,
@@ -10,41 +12,58 @@ import {
 } from "@/utils/socket-emitters";
 import { determineTrickWinner } from "@/utils/trick";
 import { playCardOnBot, startGameOnBot } from "./bot";
-import { HttpError } from "@/utils/errors";
-import httpStatus from "@/utils/http-status";
 
-export const startGame = async (roomId: string) => {
+export const startGame = async (roomId: string, playerId: string) => {
 	const room = await store.getRoom(roomId);
 	if (!room) throw new HttpError(httpStatus.NotFound, "room not found");
-	if (room.players.length < 2) throw new HttpError(httpStatus.BadRequest, "at least 2 players required");
+
+	if (room.creatorId !== playerId)
+		throw new HttpError(httpStatus.Forbidden, "only creator can start game");
+
+	if (room.players.length < 2)
+		throw new HttpError(httpStatus.BadRequest, "at least 2 players required");
 
 	const deck = shuffleDeck();
 	const cardsPerPlayer = 5;
 
+	const hands = room.players.map((_, i) =>
+		deck.slice(i * cardsPerPlayer, (i + 1) * cardsPerPlayer),
+	);
+
+	const randomIndex = Math.floor(Math.random() * room.players.length);
+
+	await store.updateRoom(roomId, (room) => {
+		room.players.forEach((player, i) => {
+			player.hand = hands[i];
+		});
+		room.status = "playing";
+		room.currentTrick = [];
+		room.trickNumber = 1;
+		room.turnIndex = randomIndex;
+	});
+
+	const playerHands = new Map<string, Card[]>();
 	room.players.forEach((player, i) => {
-		player.hand = deck.slice(i * cardsPerPlayer, (i + 1) * cardsPerPlayer);
+		playerHands.set(player.id, hands[i]);
 	});
 
 	await Promise.all(
 		room.players
 			.filter((p) => p.isBot && p.botId)
-			.map((p) => startGameOnBot(p.botId!, p.hand)),
+			.map((p) => startGameOnBot(p.botId!, playerHands.get(p.id)!)),
 	);
 
-	room.status = "playing";
-	room.currentTrick = [];
-	room.trickNumber = 1;
-	room.turnIndex = 0;
+	getIO()
+		.to(room.id)
+		.emit("gameStarted", {
+			players: room.players.map((p) => ({
+				id: p.id,
+				name: p.name,
+				isBot: p.isBot,
+			})),
+		});
 
-	getIO().to(room.id).emit("gameStarted", {
-		players: room.players.map((p) => ({
-			id: p.id,
-			name: p.name,
-			isBot: p.isBot,
-		})),
-	});
-
-	const currentPlayer = room.players[room.turnIndex];
+	const currentPlayer = room.players[randomIndex];
 	getIO().to(room.id).emit("nextTurn", { playerId: currentPlayer.id });
 };
 

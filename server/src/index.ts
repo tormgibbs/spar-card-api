@@ -10,6 +10,11 @@ const server = http.createServer(app);
 
 initSocket(server);
 
+app.use((request, _response, next) => {
+  if (request.body == null) request.body = {};
+  next();
+});
+
 app.use(express.json());
 app.use("/bot", botRoutes);
 app.use("/rooms", roomRoutes);
@@ -18,5 +23,5 @@ app.use(notFound);
 app.use(errorHandler);
 
 server.listen(3000, () => {
-	console.log("Game server running on http://localhost:3000");
+  console.log("Game server running on http://localhost:3000");
 });

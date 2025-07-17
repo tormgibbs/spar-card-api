@@ -1,18 +1,19 @@
 import { v4 as uuidv4 } from "uuid";
-import type { Room } from "@/types";
+import type { Player, Room } from "@/types";
 import type { RoomStore } from "@/types/room-store";
 
 const rooms: Map<string, Room> = new Map();
 
 export const memoryRoomStore: RoomStore = {
-	async createRoom() {
+	async createRoom(creator: Player) {
 		const room: Room = {
 			id: uuidv4(),
-			players: [],
+			players: [creator],
 			currentTrick: [],
 			trickNumber: 0,
 			turnIndex: 0,
 			status: "waiting",
+			creatorId: creator.id,
 		};
 		rooms.set(room.id, room);
 		return room;

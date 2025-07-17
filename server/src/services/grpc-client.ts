@@ -15,7 +15,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const gameProto = grpc.loadPackageDefinition(packageDefinition).game as any;
 
 const botClient = new gameProto.GameService(
-	"localhost:50051",
+	"bot-server:50051",
 	grpc.credentials.createInsecure(),
 );
 

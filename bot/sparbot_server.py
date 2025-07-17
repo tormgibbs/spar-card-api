@@ -1,4 +1,5 @@
 # type: ignore
+import signal
 import grpc
 from concurrent import futures
 import game_pb2
@@ -6,7 +7,6 @@ import game_pb2_grpc
 from sparbot import SparBot
 import uuid
 
-# Store multiple bots
 bots = {}
 
 class GameServiceServicer(game_pb2_grpc.GameServiceServicer):
@@ -84,14 +84,32 @@ class GameServiceServicer(game_pb2_grpc.GameServiceServicer):
 		except Exception as e:
 			return game_pb2.GetBotHandResponse(success=False, error=str(e))
 
+def cleanup_resources():
+	global bots
+	bots.clear()
+
+def signal_handler(server, signum, frame):
+	print(f"\nReceived signal {signum}, initiating graceful shutdown...")
+	server.stop(grace=10)
+	cleanup_resources()
+
 
 def serve():
 	server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 	game_pb2_grpc.add_GameServiceServicer_to_server(GameServiceServicer(), server)
 	server.add_insecure_port('[::]:50051')
+
+	signal.signal(signal.SIGINT, lambda sig, frame: signal_handler(server, sig, frame))
+	signal.signal(signal.SIGTERM, lambda sig, frame: signal_handler(server, sig, frame))
+
 	print("gRPC bot server running on port 50051...")
 	server.start()
-	server.wait_for_termination()
+
+	try:
+		server.wait_for_termination()
+	finally:
+		cleanup_resources()
+
 
 if __name__ == "__main__":
 	serve()

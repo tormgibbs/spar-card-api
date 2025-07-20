@@ -16,7 +16,9 @@ app.use((request, _response, next) => {
 
 app.use(express.json());
 app.use("/rooms", roomRoutes);
-
+app.get("/", (_request, response) => {
+  response.json("Welcome to the Spar Card Game!");
+});
 app.use(notFound);
 app.use(errorHandler);
 

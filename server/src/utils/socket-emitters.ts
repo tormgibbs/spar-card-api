@@ -8,31 +8,8 @@ export const emitEvent = <K extends keyof SocketEvents>(
 ) => {
   const io = getIO();
   io.to(roomId).emit(event, payload);
-  // io.to(roomId).emit(event, payload);
 };
 
-// export const emitPlayerJoined = (
-// 	roomId: string,
-// 	player: { playerId: string; name: string; isBot: boolean },
-// ) => {
-// 	io.to(roomId).emit("playerJoined", player);
-// };
-
-// export const emitGameStarted = (roomId: string, players: any[]) => {
-//   io.to(roomId).emit("gameStarted", { players });
-// };
-
-// export const emitCardPlayed = (roomId: string, payload: any) => {
-//   io.to(roomId).emit("cardPlayed", payload);
-// };
-
-// export const emitNextTurn = (roomId: string, playerId: string) => {
-//   io.to(roomId).emit("nextTurn", { playerId });
-// };
-
-// export const emitTrickCompleted = (roomId: string) => {
-//   io.to(roomId).emit("trickCompleted");
-// };
 
 export const emitPlayerJoined = (
   roomId: string,

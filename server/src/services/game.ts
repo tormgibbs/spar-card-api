@@ -80,19 +80,16 @@ export const playCard = async (
 	const currentPlayer = room.players[room.turnIndex];
 	if (currentPlayer.id !== playerId) throw new Error("Not your turn");
 
-	// Find card in hand
 	const handIndex = currentPlayer.hand.findIndex(
 		(c) => c.rank === card.rank && c.suit === card.suit,
 	);
 	if (handIndex === -1) throw new Error("Card not in hand");
 
-	// Remove card from hand
 	const playedCard = currentPlayer.hand.splice(handIndex, 1)[0];
 	room.currentTrick.push({ ...playedCard, playerId });
 
 	emitCardPlayed(roomId, { playerId, card });
 
-	// Is trick complete?
 	if (room.currentTrick.length === room.players.length) {
 		const winnerId = determineTrickWinner(room.currentTrick);
 
@@ -101,7 +98,6 @@ export const playCard = async (
 		room.turnIndex = room.players.findIndex((p) => p.id === winnerId);
 		emitTrickCompleted(roomId, { trickNumber: room.trickNumber });
 
-		// Optionally check for game over here (TODO)
 	} else {
 		room.turnIndex = (room.turnIndex + 1) % room.players.length;
 	}
@@ -109,7 +105,6 @@ export const playCard = async (
 	const nextPlayer = room.players[room.turnIndex];
 	emitNextTurn(roomId, { playerId: nextPlayer.id });
 
-	// If next player is bot, play automatically
 	if (nextPlayer.isBot && nextPlayer.botId) {
 		const trickCopy = room.currentTrick.map((c) => ({
 			rank: c.rank,
@@ -123,13 +118,11 @@ export const playCard = async (
 				trickCopy,
 				handCopy,
 			);
-			// Recursively continue play for bot
 			await playCard(roomId, nextPlayer.id, botCard, request, response);
 		} catch (err: any) {
 			console.error("Bot play failed:", err.message || err);
 		}
 	} else {
-		// Send success only when human finishes turn
 		response.json({ success: true });
 	}
 };

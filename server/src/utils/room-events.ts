@@ -99,14 +99,6 @@ export const subscribeToRoomEvents = () => {
         });
         break;
 
-      case "update":
-        // fallback — no-op or emit something generic if needed
-        break;
-
-      case "create":
-        // optional: broadcast new room created (useful for lobbies)
-        break;
-
       default:
         console.warn("Unknown room event type:", type);
     }

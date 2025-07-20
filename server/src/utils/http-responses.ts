@@ -1,17 +1,6 @@
 import type { Request, Response } from "express";
-import httpStatus from "./http-status";
 import httpMessage from "./http-message";
-// import logger from "@/config/logger";
-
-
-// const logError = (request: Request, error: Error) => {
-// 	logger.error({
-// 		stack: error.stack,
-// 		error: error.message,
-// 		method: request.method,
-// 		url: request.url,
-// 	});
-// };
+import httpStatus from "./http-status";
 
 export const errorResponse = (
 	response: Response,
@@ -29,11 +18,14 @@ export const serverErrorResponse = (
 	response: Response,
 	error: Error,
 ) => {
-	console.log({
-	  requestUrl: request.url,
-	  requestMethod: request.method,
-	  requestBody: request.body,
-	}, error);
+	console.log(
+		{
+			requestUrl: request.url,
+			requestMethod: request.method,
+			requestBody: request.body,
+		},
+		error,
+	);
 	errorResponse(
 		response,
 		500,
